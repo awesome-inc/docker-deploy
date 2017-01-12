@@ -22,9 +22,9 @@ Alternatively use [Vagrant](https://www.vagrantup.com/)
 
 Then hit the UIs for
 
-- [Gogs](https://gogs.io/) at [localhost:3000](localhost:3000)
-- [Jenkins](https://jenkins.io/) at [localhost:8080](localhost:8080)
-- [Docker Registry](https://github.com/kwk/docker-registry-frontend) at [localhost:80](localhost:80)
+- [Gogs](https://gogs.io/) at [http://localhost:3000](http://localhost:3000)
+- [Jenkins](https://jenkins.io/) at [http://localhost:8080](http://localhost:8080)
+- [Docker Registry](https://github.com/kwk/docker-registry-frontend) at [http://localhost:80](http://localhost:80)
 
 ## References
 
