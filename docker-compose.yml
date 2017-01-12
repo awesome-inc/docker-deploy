@@ -1,0 +1,69 @@
+version: '2'
+services:
+  # cf.: https://docs.docker.com/registry/deploying/
+  registry:
+    image: registry:2.5.1
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./registry/data:/var/lib/registry
+    environment:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+  # cf.: https://github.com/kwk/docker-registry-frontend/tree/v2
+  ui:
+    image: konradkleine/docker-registry-frontend:v2
+    ports:
+      - "80:80"
+    environment:
+      ENV_DOCKER_REGISTRY_HOST: registry
+      ENV_DOCKER_REGISTRY_PORT: 5000
+    links:
+      - registry
+  # cf.: https://github.com/jenkinsci/docker/issues/196#issuecomment-252077192
+  jenkins:
+    build: 
+      context: ./jenkins
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins/home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/docker-compose:/usr/bin/docker-compose
+    environment:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: "${no_proxy},registry,gogs"
+      # for jenkins, git plugin
+      NO_PROXY: "${no_proxy},registry,gogs"
+      # for Dood
+      DOCKER_SOCKET: /var/run/docker.sock
+      DOCKER_GROUP: dockerhost
+      JENKINS_USER: jenkins
+      #JENKINS_URL: "https://jenkins.example.com/"
+      DOCKER_HOST: unix:///var/run/docker.sock
+      # should be 'registry:5000' but is of course rejected when Docker-outside-of-Docker (DooD)
+      ENV_DOCKER_REGISTRY_URL: http://localhost:5000
+      ENV_DOCKER_REGISTRY_CREDENTIALS: 
+    links:
+      - gogs
+      - registry
+  gogs:
+    image: gogs/gogs
+    volumes:
+      - ./gogs/data:/data
+    ports:
+      - "10022:22"
+      - "3000:3000"
+    environment:
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
